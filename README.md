@@ -92,3 +92,4 @@ Elke endpoint valt in één van drie niveaus: **gast** (geen token), **user** (i
 | `DELETE /:id` (servers/services/incidents)           | –    | –                                | ✓     |
 
 Beveiligingsdetails: wachtwoorden worden bcrypt-gehasht (10 rounds), tokens vervallen na 1 uur, een gewone user kan zijn eigen rechten niet verhogen (`role` wordt stil genegeerd bij eigen profiel-updates) en een niet-bestaan/bestaand email + fout wachtwoord geven bewust dezelfde 401-melding.
+
