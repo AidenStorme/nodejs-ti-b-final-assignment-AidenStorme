@@ -1,10 +1,24 @@
 const express = require('express');
 const Incident = require('../models/Incident');
 const validateObjectId = require('../middleware/validateObjectId');
+const auth = require('../middleware/auth');
+const admin = require('../middleware/admin');
+
+/**
+ * Toegangsmatrix — routes/incidents.js
+ *
+ * | Endpoint    | Gast | User                  | Admin |
+ * |-------------|------|-----------------------|-------|
+ * | GET /       |  -   |  ja                   |  ja   |
+ * | GET /:id    |  -   |  ja                   |  ja   |
+ * | POST /      |  -   |  ja                   |  ja   |
+ * | PUT /:id    |  -   |  ja (reportedBy)      |  ja   |
+ * | DELETE /:id |  -   |  -                    |  ja   |
+ */
 
 const router = express.Router();
 
-router.get('/', async (req, res) => {
+router.get('/', auth, async (req, res) => {
   try {
     const filter = {};
     if (req.query.status) {
@@ -22,7 +36,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-router.get('/:id', validateObjectId, async (req, res) => {
+router.get('/:id', validateObjectId, auth, async (req, res) => {
   try {
     const incident = await Incident.findById(req.params.id)
       .populate('affectedService', 'name')
@@ -39,7 +53,7 @@ router.get('/:id', validateObjectId, async (req, res) => {
   }
 });
 
-router.post('/', async (req, res) => {
+router.post('/', auth, async (req, res) => {
   try {
     const incident = await Incident.create(req.body);
     res.status(201).json(incident);
@@ -51,16 +65,20 @@ router.post('/', async (req, res) => {
   }
 });
 
-router.put('/:id', validateObjectId, async (req, res) => {
+router.put('/:id', validateObjectId, auth, async (req, res) => {
   try {
-    const incident = await Incident.findByIdAndUpdate(req.params.id, req.body, {
-      returnDocument: 'after',
-      runValidators: true,
-    });
+    const incident = await Incident.findById(req.params.id);
     if (!incident) {
       return res.status(404).json({ error: 'Incident niet gevonden' });
     }
-    res.json(incident);
+    if (incident.reportedBy.toString() !== req.user.id && req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'Geen toegang' });
+    }
+    const updated = await Incident.findByIdAndUpdate(req.params.id, req.body, {
+      returnDocument: 'after',
+      runValidators: true,
+    });
+    res.json(updated);
   } catch (err) {
     if (err.name === 'ValidationError') {
       return res.status(400).json({ error: err.message });
@@ -69,7 +87,7 @@ router.put('/:id', validateObjectId, async (req, res) => {
   }
 });
 
-router.delete('/:id', validateObjectId, async (req, res) => {
+router.delete('/:id', validateObjectId, auth, admin, async (req, res) => {
   try {
     const incident = await Incident.findByIdAndDelete(req.params.id);
     if (!incident) {
