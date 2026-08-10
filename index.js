@@ -30,6 +30,17 @@ app.use('/api/services', servicesRouter);
 app.use('/api/incidents', incidentsRouter);
 app.use('/api/auth', authRouter);
 
+app.use((err, req, res, next) => {
+  console.error(err);
+  if (err.name === 'ValidationError' || err.name === 'CastError') {
+    return res.status(400).json({ error: err.message });
+  }
+  if (err.code === 11000) {
+    return res.status(400).json({ error: 'Email is al in gebruik' });
+  }
+  res.status(err.status || 500).json({ error: err.message || 'Er ging iets mis op de server' });
+});
+
 const PORT = process.env.PORT || 3000;
 const MONGO_URI = process.env.MONGO_URI;
 

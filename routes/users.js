@@ -1,6 +1,7 @@
 const express = require('express');
 const User = require('../models/User');
 const validateObjectId = require('../middleware/validateObjectId');
+const asyncHandler = require('../middleware/asyncHandler');
 const auth = require('../middleware/auth');
 const admin = require('../middleware/admin');
 
@@ -20,35 +21,35 @@ const admin = require('../middleware/admin');
 
 const router = express.Router();
 
-router.get('/', auth, admin, async (req, res) => {
-  try {
+router.get(
+  '/',
+  auth,
+  admin,
+  asyncHandler(async (req, res) => {
     const users = await User.find().select('-passwordHash');
     res.json(users);
-  } catch (err) {
-    if (err.name === 'ValidationError') {
-      return res.status(400).json({ error: err.message });
-    }
-    res.status(500).json({ error: err.message });
-  }
-});
+  })
+);
 
-router.get('/:id', validateObjectId, auth, admin, async (req, res) => {
-  try {
+router.get(
+  '/:id',
+  validateObjectId,
+  auth,
+  admin,
+  asyncHandler(async (req, res) => {
     const user = await User.findById(req.params.id).select('-passwordHash');
     if (!user) {
       return res.status(404).json({ error: 'User niet gevonden' });
     }
     res.json(user);
-  } catch (err) {
-    if (err.name === 'ValidationError') {
-      return res.status(400).json({ error: err.message });
-    }
-    res.status(500).json({ error: err.message });
-  }
-});
+  })
+);
 
-router.post('/', auth, admin, async (req, res) => {
-  try {
+router.post(
+  '/',
+  auth,
+  admin,
+  asyncHandler(async (req, res) => {
     const user = await User.create({
       name: req.body.name,
       email: req.body.email,
@@ -58,16 +59,14 @@ router.post('/', auth, admin, async (req, res) => {
     const safeUser = user.toObject();
     delete safeUser.passwordHash;
     res.status(201).json(safeUser);
-  } catch (err) {
-    if (err.name === 'ValidationError') {
-      return res.status(400).json({ error: err.message });
-    }
-    res.status(500).json({ error: err.message });
-  }
-});
+  })
+);
 
-router.put('/:id', validateObjectId, auth, async (req, res) => {
-  try {
+router.put(
+  '/:id',
+  validateObjectId,
+  auth,
+  asyncHandler(async (req, res) => {
     if (req.user.id !== req.params.id && req.user.role !== 'admin') {
       return res.status(403).json({ error: 'Geen toegang' });
     }
@@ -94,27 +93,21 @@ router.put('/:id', validateObjectId, auth, async (req, res) => {
     const safeUser = user.toObject();
     delete safeUser.passwordHash;
     res.json(safeUser);
-  } catch (err) {
-    if (err.name === 'ValidationError') {
-      return res.status(400).json({ error: err.message });
-    }
-    res.status(500).json({ error: err.message });
-  }
-});
+  })
+);
 
-router.delete('/:id', validateObjectId, auth, admin, async (req, res) => {
-  try {
+router.delete(
+  '/:id',
+  validateObjectId,
+  auth,
+  admin,
+  asyncHandler(async (req, res) => {
     const user = await User.findByIdAndDelete(req.params.id);
     if (!user) {
       return res.status(404).json({ error: 'User niet gevonden' });
     }
     res.json({ message: 'User verwijderd' });
-  } catch (err) {
-    if (err.name === 'ValidationError') {
-      return res.status(400).json({ error: err.message });
-    }
-    res.status(500).json({ error: err.message });
-  }
-});
+  })
+);
 
 module.exports = router;

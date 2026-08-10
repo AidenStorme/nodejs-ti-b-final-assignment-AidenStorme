@@ -2,16 +2,22 @@ const express = require('express');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const asyncHandler = require('../middleware/asyncHandler');
 const auth = require('../middleware/auth');
 
 const router = express.Router();
 
-router.get('/me', auth, (req, res) => {
-  res.json(req.user);
-});
+router.get(
+  '/me',
+  auth,
+  asyncHandler(async (req, res) => {
+    res.json(req.user);
+  })
+);
 
-router.post('/register', async (req, res) => {
-  try {
+router.post(
+  '/register',
+  asyncHandler(async (req, res) => {
     const { name, email, password } = req.body;
     if (!name || !email || !password) {
       return res.status(400).json({ error: 'name, email en password zijn verplicht' });
@@ -20,19 +26,12 @@ router.post('/register', async (req, res) => {
     const safeUser = user.toObject();
     delete safeUser.passwordHash;
     res.status(201).json(safeUser);
-  } catch (err) {
-    if (err.name === 'ValidationError') {
-      return res.status(400).json({ error: err.message });
-    }
-    if (err.code === 11000) {
-      return res.status(400).json({ error: 'Email is al in gebruik' });
-    }
-    res.status(500).json({ error: err.message });
-  }
-});
+  })
+);
 
-router.post('/login', async (req, res) => {
-  try {
+router.post(
+  '/login',
+  asyncHandler(async (req, res) => {
     const { email, password } = req.body;
     if (!email || !password) {
       return res.status(400).json({ error: 'email en password zijn verplicht' });
@@ -55,9 +54,7 @@ router.post('/login', async (req, res) => {
     const safeUser = user.toObject();
     delete safeUser.passwordHash;
     res.json({ token, user: safeUser });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
+  })
+);
 
 module.exports = router;
