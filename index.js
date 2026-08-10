@@ -5,6 +5,11 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 const dotenv = require('dotenv');
 
+const usersRouter = require('./routes/users');
+const serversRouter = require('./routes/servers');
+const servicesRouter = require('./routes/services');
+const incidentsRouter = require('./routes/incidents');
+
 dotenv.config();
 
 const app = express();
@@ -17,6 +22,11 @@ app.use(express.json());
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });
 });
+
+app.use('/api/users', usersRouter);
+app.use('/api/servers', serversRouter);
+app.use('/api/services', servicesRouter);
+app.use('/api/incidents', incidentsRouter);
 
 const PORT = process.env.PORT || 3000;
 const MONGO_URI = process.env.MONGO_URI;
