@@ -1,8 +1,8 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 function validateObjectId(req, res, next) {
   if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-    return res.status(400).json({ error: 'Ongeldig ID formaat' });
+    return res.status(400).json({ error: "Ongeldig ID formaat" });
   }
   next();
 }

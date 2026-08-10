@@ -23,6 +23,7 @@ mongodb+srv://<user>:<password>@<cluster>.xxxxx.mongodb.net/?retryWrites=true&w=
 ```
 
 Zorg dat:
+
 - er een database-user bestaat (Database Access) met wachtwoord,
 - je in de URI **vóór het `?`** een databasenaam plakt, bv. `...mongodb.net/eindwerk?retryWrites=...`, en
 - **Network Access** op `0.0.0.0/0` staat (IP-whitelist "allow from anywhere"). Dat is voor een studentenproject aanvaardbaar omdat alleen je connection-string (met user + wachtwoord) toegang geeft; leg dit uit in je mondelinge verdediging.
@@ -42,12 +43,12 @@ Diezelfde drie waarden plak je straks letterlijk in het Render-dashboard (stap 4
 
 Render toont een formulier met velden. Vul in:
 
-| Veld | Waarde | Waarom |
-|---|---|---|
-| **Name** | bv. `mijn-homelab-api` | bepaalt je live URL |
-| **Runtime** | `Node` | Render detecteert dit meestal zelf |
-| **Build Command** | `npm install` | installeert de dependencies uit package.json |
-| **Start Command** | `npm start` | draait het `start`-script = `node index.js` |
+| Veld              | Waarde                 | Waarom                                       |
+| ----------------- | ---------------------- | -------------------------------------------- |
+| **Name**          | bv. `mijn-homelab-api` | bepaalt je live URL                          |
+| **Runtime**       | `Node`                 | Render detecteert dit meestal zelf           |
+| **Build Command** | `npm install`          | installeert de dependencies uit package.json |
+| **Start Command** | `npm start`            | draait het `start`-script = `node index.js`  |
 
 [SCREENSHOT: Formulier met Build Command en Start Command ingevuld]
 
@@ -61,11 +62,11 @@ Het `start`-script staat al in `package.json`:
 
 Scroll in hetzelfde formulier naar **Environment** → **Add Environment Variable** en voeg drie waarden toe (exact dezelfde namen als in `.env.example`):
 
-| Key | Value |
-|---|---|
-| `MONGO_URI` | jouw volledige Atlas-connection string (incl. databasenaam) |
+| Key          | Value                                                                        |
+| ------------ | ---------------------------------------------------------------------------- |
+| `MONGO_URI`  | jouw volledige Atlas-connection string (incl. databasenaam)                  |
 | `JWT_SECRET` | een lange willekeurige string, lokaal gegenereerd met `openssl rand -hex 32` |
-| `NODE_ENV` | `production` (zie stap 5) |
+| `NODE_ENV`   | `production` (zie stap 5)                                                    |
 
 **`PORT` zet je NIET zelf.** Render draait je app altijd achter een eigen proxy en injecteert zelf een poortnummer als omgevingsvariabele. Je code moet dus luisteren op `process.env.PORT` met een fallback voor lokaal draaien. Gecontroleerd: `index.js` heeft exact dat:
 
@@ -116,31 +117,37 @@ Verwacht: `{"status":"ok"}`. Daarna kun je in `http/*.http` de `@baseUrl` vervan
 Alle fouten zijn terug te vinden in het **Logs**-tabblad. De meest voorkomende problemen:
 
 **A. `MongoServerSelectionError` / `getaddrinfo ENOTFOUND ...`**
+
 - **Mogelijke oorzaak:** de IP-whitelist van Atlas staat niet op `0.0.0.0/0` (Render draait vanuit wisselende IP's).
 - **Herken in logs:** `MongooseServerSelectionError: Could not connect to any servers` of een DNS-fout op je cluster-hostname.
 - **Oplossing:** Atlas → Network Access → Add IP Address → `0.0.0.0/0` → Save, en opnieuw deployen (Settings → **Manual Deploy** → Deploy latest commit).
 
 **B. `EADDRINUSE` of de app draait maar de URL geeft 404/timeout**
+
 - **Mogelijke oorzaak:** `PORT` staat nog hardcoded op 3000 ergens (of je hebt `PORT` lokaal als omgevingsvariabele gezet).
 - **Herken in logs:** `EADDRINUSE: address already in use :::3000` of de app start niet.
 - **Oplossing:** staat er ergens `app.listen(3000, ...)`? Vervang door `process.env.PORT || 3000` (zie stap 4). Verwijder een eventueel zelf ingestelde `PORT`-variabele uit het dashboard (Render injected die zelf).
 
 **C. `Command failed with exit code 1` bij de build**
+
 - **Mogelijke oorzaak:** verkeerd build-command, bv. `npm install && npm start` in het build-veld, of een typfout in `package.json`.
 - **Herken in logs:** het Build-tabblad toont de NPM-foutmelding.
 - **Oplossing:** zet Build Command terug op exact `npm install` en Start Command op exact `npm start`. Controleer met `npm run` lokaal dat het script bestaat.
 
 **D. `Cannot find module 'express'` (of een ander pakket) bij het starten**
+
 - **Mogelijke oorzaak:** `node_modules` is mee gecommit geweest in een oude commit of dependencies ontbreken.
 - **Herken in logs:** `Error: Cannot find module 'express'`.
 - **Oplossing:** controleer dat `node_modules/` in `.gitignore` staat en in geen enkele (oude) commit zit; de build moet zelf `npm install` draaien.
 
 **E. `UnauthorizedError` / `JWT_SECRET` is undefined bij login**
+
 - **Mogelijke oorzaak:** `JWT_SECRET` ontbreekt in de Render-environment.
 - **Herken in logs:** een error die naar `jwt.sign` of `secretOrPrivateKey` verwijst, of login geeft 500.
 - **Oplossing:** voeg `JWT_SECRET` toe in Environment (stap 4) en deploy opnieuw.
 
 **F. App start wel maar `/api/health` geeft 404**
+
 - **Mogelijke oorzaak:** verkeerde URL (een andere folder is gedeployed) of de service draait nog een oude build.
 - **Herken in logs:** geen `Verbonden met MongoDB` of `Server draait`-regels.
 - **Oplossing:** check de Events/logs van de build en doe Settings → Manual Deploy → Deploy latest commit.

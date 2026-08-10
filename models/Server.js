@@ -1,11 +1,11 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const installedAppSchema = new mongoose.Schema(
   {
     naam: { type: String, required: true },
     versie: { type: String, required: true },
   },
-  { _id: false }
+  { _id: false },
 );
 
 const serverSchema = new mongoose.Schema({
@@ -15,7 +15,7 @@ const serverSchema = new mongoose.Schema({
     required: true,
     validate: {
       validator: (value) => {
-        const parts = value.split('.');
+        const parts = value.split(".");
         return (
           parts.length === 4 &&
           parts.every((part) => {
@@ -32,9 +32,9 @@ const serverSchema = new mongoose.Schema({
   cpuCores: { type: Number, required: true, min: 0 },
   ramGB: { type: Number, required: true, min: 0 },
   storageGB: { type: Number, required: true, min: 0 },
-  status: { type: String, enum: ['running', 'stopped', 'error'] },
-  owner: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  status: { type: String, enum: ["running", "stopped", "error"] },
+  owner: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   installedApps: [installedAppSchema],
 });
 
-module.exports = mongoose.model('Server', serverSchema);
+module.exports = mongoose.model("Server", serverSchema);
