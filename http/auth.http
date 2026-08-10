@@ -1,0 +1,48 @@
+# Authenticatie — http/auth.http
+# Plaatshouders: test@example.com / test123. Geen echte tokens of wachtwoorden.
+@baseUrl = http://localhost:3000
+
+### Register — verwacht 201 (fout op "already exists" is ok, dan eerst deleten of andere email gebruiken)
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Test User",
+  "email": "test@example.com",
+  "password": "test123"
+}
+
+### Login — token wordt via {{login.response.body.$.token}} automatisch hergebruikt
+# @name login
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "test123"
+}
+
+### Me met geldig token — verwacht 200 met { id, role, iat, exp }
+GET {{baseUrl}}/api/auth/me
+Authorization: Bearer {{login.response.body.$.token}}
+
+### Me zonder token — verwacht 401
+GET {{baseUrl}}/api/auth/me
+
+### Login met fout wachtwoord — verwacht 401 (generieke melding)
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "verkeerd-wachtwoord"
+}
+
+### Login met onbekend email — verwacht 401, identieke melding als hierboven
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "bestaatniet@example.com",
+  "password": "test123"
+}

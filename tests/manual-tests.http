@@ -26,15 +26,11 @@ GET {{baseUrl}}/api/auth/me
 
 ### 4. GET /api/auth/me MET geldig token — verwacht 200 met je id/role
 GET {{baseUrl}}/api/auth/me
-Authorization: Bearer {{login.response.body.token}}
+Authorization: Bearer {{login.response.body.$.token}}
 
-### 5. GET /api/auth/me met KAPOT token — verwacht 400
+### 5. GET /api/auth/me met JOUW token uit request 2 — verwacht 200
 GET {{baseUrl}}/api/auth/me
-Authorization: Bearer ditisgeengeldigtoken
-
-### 5. GET /api/auth/me met juiste token — verwacht 200
-GET {{baseUrl}}/api/auth/me
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhN2ExMmIzZjQ5NzI4NjE0M2UxMWM4YSIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzg2Mzg1MDk2LCJleHAiOjE3ODYzODg2OTZ9.svHyKOGKOnj2J_CgzxT59l4Fyg8g1kvSeD3VYqNuu8o
+Authorization: Bearer {{login.response.body.$.token}}
 
 ### Ongeldig e-mailadres — verwacht 400
 POST http://localhost:3000/api/users

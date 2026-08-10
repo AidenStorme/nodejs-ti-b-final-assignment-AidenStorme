@@ -15,9 +15,6 @@ AGENTS.md
 *.log
 coverage/
 .DS_Store
-docs/claude-project-instructies.md
-.gitignore
-docs/node-eindwerk-cursusgids.md
+
+# secrets
 atlas-credentials.env
-.gitignore
-.env.example

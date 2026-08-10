@@ -1,0 +1,83 @@
+# Services — http/services.http
+# Volledig dynamisch: server wordt eerst aangemaakt (createServer), de service
+# linkt er via de response-id aan. DELETE vereist een admin-account.
+@baseUrl = http://localhost:3000
+
+### Register (indien nog geen account)
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Test User",
+  "email": "test@example.com",
+  "password": "test123"
+}
+
+### Login — token wordt automatisch hergebruikt
+# @name login
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "test123"
+}
+
+### Server aanmaken als basis voor de m2m-koppeling — verwacht 201
+# @name createServer
+POST {{baseUrl}}/api/servers
+Content-Type: application/json
+Authorization: Bearer {{login.response.body.$.token}}
+
+{
+  "hostname": "proxmox-01",
+  "ip": "10.0.0.5",
+  "os": "Ubuntu 24.04",
+  "cpuCores": 4,
+  "ramGB": 16,
+  "storageGB": 500,
+  "owner": "{{login.response.body.$.user._id}}"
+}
+
+### Alle services — verwacht 200 (servers gepopulated)
+GET {{baseUrl}}/api/services
+Authorization: Bearer {{login.response.body.$.token}}
+
+### Service aanmaken — verwacht 201, gekoppeld aan de zopas aangemaakte server
+# @name createService
+POST {{baseUrl}}/api/services
+Content-Type: application/json
+Authorization: Bearer {{login.response.body.$.token}}
+
+{
+  "name": "nginx-proxy",
+  "image": "nginx:1.25",
+  "internalPort": 80,
+  "publicUrl": "http://proxy.local",
+  "replicas": 2,
+  "envVars": {
+    "NODE_ENV": "production"
+  },
+  "servers": ["{{createServer.response.body.$._id}}"]
+}
+
+### Eén service — verwacht 200
+GET {{baseUrl}}/api/services/{{createService.response.body.$._id}}
+Authorization: Bearer {{login.response.body.$.token}}
+
+### Update service — verwacht 200 (owner van een gelinkte server of admin)
+PUT {{baseUrl}}/api/services/{{createService.response.body.$._id}}
+Content-Type: application/json
+Authorization: Bearer {{login.response.body.$.token}}
+
+{
+  "replicas": 3,
+  "healthCheck": {
+    "laatsteCheck": "2026-08-10T10:00:00Z",
+    "status": "healthy"
+  }
+}
+
+### Verwijderen — verwacht 403 met normale user (enkel admin mag), 200 met admin
+DELETE {{baseUrl}}/api/services/{{createService.response.body.$._id}}
+Authorization: Bearer {{login.response.body.$.token}}

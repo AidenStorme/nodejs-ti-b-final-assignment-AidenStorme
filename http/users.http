@@ -1,0 +1,79 @@
+# Users — http/users.http
+# BELANGRIJK: GET /, POST / en DELETE / zijn admin-only.
+# Register maakt altijd role "user" aan; een admin maak je in dev lokaal:
+#   node -e "require('dotenv').config(); const m=require('mongoose'); const U=require('./models/User');
+#   (async()=>{ await m.connect(process.env.MONGO_URI); await U.findByIdAndUpdate('<user_id>',{role:'admin'}); await m.disconnect(); })()"
+# Log daarna in met dat admin-account in de login-request hieronder.
+# Met een normale user-token zie je netjes de 403-reacties (zie laatste request).
+@baseUrl = http://localhost:3000
+
+### Register — verwacht 201 (eenmalig)
+# @name register
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Test User",
+  "email": "test@example.com",
+  "password": "test123"
+}
+
+### Login — log hier in met een ADMIN-account voor de admin-routes
+# @name login
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "test123"
+}
+
+### Alle users — verwacht 200 (enkel admin)
+GET {{baseUrl}}/api/users
+Authorization: Bearer {{login.response.body.$.token}}
+
+### Eén user — verwacht 200 (enkel admin)
+GET {{baseUrl}}/api/users/{{register.response.body.$._id}}
+Authorization: Bearer {{login.response.body.$.token}}
+
+### User aanmaken — verwacht 201 (enkel admin)
+# @name createUser
+POST {{baseUrl}}/api/users
+Content-Type: application/json
+Authorization: Bearer {{login.response.body.$.token}}
+
+{
+  "name": "Nieuwe User",
+  "email": "nieuw@example.com",
+  "password": "test123"
+}
+
+### Update eigen profiel — verwacht 200 (eigenaar of admin; role wordt door niet-admins genegeerd)
+PUT {{baseUrl}}/api/users/{{register.response.body.$._id}}
+Content-Type: application/json
+Authorization: Bearer {{login.response.body.$.token}}
+
+{
+  "name": "Aangepaste Naam"
+}
+
+### Update ANDER profiel — verwacht 403 (enkel eigen profiel of admin)
+PUT {{baseUrl}}/api/users/{{createUser.response.body.$._id}}
+Content-Type: application/json
+Authorization: Bearer {{login.response.body.$.token}}
+
+{
+  "name": "Kaping Poging"
+}
+
+### Verwijderen — verwacht 200 (enkel admin)
+DELETE {{baseUrl}}/api/users/{{createUser.response.body.$._id}}
+Authorization: Bearer {{login.response.body.$.token}}
+
+### Voorbeeld: normale user op admin-route — verwacht 403 Geen toegang
+GET {{baseUrl}}/api/users
+Authorization: Bearer {{login.response.body.$.token}}
+
+### Ongeldig ID — verwacht 400
+GET {{baseUrl}}/api/users/niets-geldig
+Authorization: Bearer {{login.response.body.$.token}}

@@ -1,0 +1,80 @@
+# Incidents — http/incidents.http
+# Volledig dynamisch: service wordt eerst aangemaakt, incident linkt er via
+# de response-id aan. reportedBy = ingelogde user. DELETE vereist een admin.
+@baseUrl = http://localhost:3000
+
+### Register (indien nog geen account)
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Test User",
+  "email": "test@example.com",
+  "password": "test123"
+}
+
+### Login — token + user._id worden automatisch hergebruikt
+# @name login
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "test123"
+}
+
+### Service aanmaken als basis voor affectedService — verwacht 201
+# @name createService
+POST {{baseUrl}}/api/services
+Content-Type: application/json
+Authorization: Bearer {{login.response.body.$.token}}
+
+{
+  "name": "nginx-proxy",
+  "image": "nginx:1.25"
+}
+
+### Alle incidents met status-filter — verwacht 200
+GET {{baseUrl}}/api/incidents?status=open
+Authorization: Bearer {{login.response.body.$.token}}
+
+### Incident aanmaken — verwacht 201
+# @name createIncident
+POST {{baseUrl}}/api/incidents
+Content-Type: application/json
+Authorization: Bearer {{login.response.body.$.token}}
+
+{
+  "title": "Nginx-proxy niet bereikbaar",
+  "description": "De proxy antwoordt niet meer op poort 80",
+  "severity": "high",
+  "affectedService": "{{createService.response.body.$._id}}",
+  "reportedBy": "{{login.response.body.$.user._id}}",
+  "timeline": [
+    {
+      "status": "open",
+      "timestamp": "2026-08-10T09:00:00Z"
+    }
+  ]
+}
+
+### Eén incident — verwacht 200
+GET {{baseUrl}}/api/incidents/{{createIncident.response.body.$._id}}
+Authorization: Bearer {{login.response.body.$.token}}
+
+### Update incident (bv. acknowledge) — verwacht 200 (reporter of admin)
+PUT {{baseUrl}}/api/incidents/{{createIncident.response.body.$._id}}
+Content-Type: application/json
+Authorization: Bearer {{login.response.body.$.token}}
+
+{
+  "status": "acknowledged",
+  "timeline": [
+    { "status": "open", "timestamp": "2026-08-10T09:00:00Z" },
+    { "status": "acknowledged", "timestamp": "2026-08-10T09:15:00Z" }
+  ]
+}
+
+### Verwijderen — verwacht 403 met normale user (enkel admin mag), 200 met admin
+DELETE {{baseUrl}}/api/incidents/{{createIncident.response.body.$._id}}
+Authorization: Bearer {{login.response.body.$.token}}

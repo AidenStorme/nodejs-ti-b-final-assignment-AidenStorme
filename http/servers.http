@@ -1,0 +1,69 @@
+# Servers — http/servers.http
+# Alles is dynamisch: owner komt uit de register/login-response.
+# DELETE vereist een admin-account (verwacht 403 met normale user).
+@baseUrl = http://localhost:3000
+
+### Register (indien nog geen account) — verwacht 201
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Test User",
+  "email": "test@example.com",
+  "password": "test123"
+}
+
+### Login — token + user._id worden automatisch hergebruikt
+# @name login
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "test123"
+}
+
+### Alle servers — verwacht 200
+GET {{baseUrl}}/api/servers
+Authorization: Bearer {{login.response.body.$.token}}
+
+### Server aanmaken — verwacht 201 (owner = ingelogde user)
+# @name createServer
+POST {{baseUrl}}/api/servers
+Content-Type: application/json
+Authorization: Bearer {{login.response.body.$.token}}
+
+{
+  "hostname": "proxmox-01",
+  "ip": "10.0.0.5",
+  "os": "Ubuntu 24.04",
+  "cpuCores": 4,
+  "ramGB": 16,
+  "storageGB": 500,
+  "owner": "{{login.response.body.$.user._id}}",
+  "installedApps": [
+    { "naam": "nginx", "versie": "1.25.1" },
+    { "naam": "docker", "versie": "27.0" }
+  ]
+}
+
+### Eén server — verwacht 200
+GET {{baseUrl}}/api/servers/{{createServer.response.body.$._id}}
+Authorization: Bearer {{login.response.body.$.token}}
+
+### Services op deze server — verwacht 200 (m2m-query)
+GET {{baseUrl}}/api/servers/{{createServer.response.body.$._id}}/services
+Authorization: Bearer {{login.response.body.$.token}}
+
+### Update server — verwacht 200 (owner of admin)
+PUT {{baseUrl}}/api/servers/{{createServer.response.body.$._id}}
+Content-Type: application/json
+Authorization: Bearer {{login.response.body.$.token}}
+
+{
+  "status": "running"
+}
+
+### Verwijderen — verwacht 403 met normale user (enkel admin mag), 200 met admin
+DELETE {{baseUrl}}/api/servers/{{createServer.response.body.$._id}}
+Authorization: Bearer {{login.response.body.$.token}}
