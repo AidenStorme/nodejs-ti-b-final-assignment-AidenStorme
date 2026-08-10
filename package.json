@@ -1,0 +1,24 @@
+{
+  "name": "nodejs-ti-b-final-assignment-aidenstorme",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/VIVES-Zuid/nodejs-ti-b-final-assignment-AidenStorme.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/VIVES-Zuid/nodejs-ti-b-final-assignment-AidenStorme/issues"
+  },
+  "homepage": "https://github.com/VIVES-Zuid/nodejs-ti-b-final-assignment-AidenStorme#readme",
+  "devDependencies": {
+    "@types/node": "^26.2.0"
+  }
+}
