@@ -1,7 +1,9 @@
 # Services — http/services.http
 # Volledig dynamisch: server wordt eerst aangemaakt (createServer), de service
 # linkt er via de response-id aan. DELETE vereist een admin-account.
-@baseUrl = http://localhost:3000
+# @baseUrl = http://localhost:3000
+
+@baseUrl = https://nodejs-ti-b-final-assignment-aidenstorme.onrender.com
 
 ### Register (indien nog geen account)
 POST {{baseUrl}}/api/auth/register

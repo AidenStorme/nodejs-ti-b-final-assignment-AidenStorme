@@ -32,9 +32,18 @@ Diezelfde drie waarden plak je straks letterlijk in het Render-dashboard (stap 4
 
 ## 2. Render-account en "New Web Service"
 
+> **Deployment gebeurt vanuit een persoonlijke mirror-repo.** De schoolorganisatie `VIVES-Zuid` staat geen toegang toe aan third-party GitHub-apps zoals Render, waardoor Render de originele repo niet kan zien of verbinden. Daarom wordt er een persoonlijke (mirror-)repo bijgehouden op `AidenStorme/nodejs-ti-b-final-assignment-AidenStorme` en gedeployed vanuit die repo. De mirror wordt bijgewerkt met deze remote/push-commando's:
+>
+> ```bash
+> git remote add mirror https://github.com/AidenStorme/nodejs-ti-b-final-assignment-AidenStorme.git
+> git push mirror main
+> ```
+>
+> (Is de remote al toegevoegd, dan volstaat `git push mirror main`.) Render selecteer je dus de repo van je persoonlijke account, niet die van `VIVES-Zuid`.
+
 1. Maak een gratis account op [render.com](https://render.com) (inloggen met GitHub is makkelijkst — Render kan dan direct je repo's zien).
 2. Klik in het dashboard op **New +** → **Web Service**.
-3. Verbind je GitHub-account als dat nog niet gebeurd is en selecteer de repo `nodejs-ti-b-final-assignment-AidenStorme`. Render pikt de branch (`main`) en het pad (repo-root) automatisch op.
+3. Verbind je GitHub-account als dat nog niet gebeurd is en selecteer de repo `nodejs-ti-b-final-assignment-AidenStorme` van je persoonlijke account (de mirror). Render pikt de branch (`main`) en het pad (repo-root) automatisch op.
 
 [SCREENSHOT: Render dashboard — New Web Service knop]
 [SCREENSHOT: Repo-selectie in de "New Web Service"-flow]

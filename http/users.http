@@ -5,7 +5,9 @@
 #   (async()=>{ await m.connect(process.env.MONGO_URI); await U.findByIdAndUpdate('<user_id>',{role:'admin'}); await m.disconnect(); })()"
 # Log daarna in met dat admin-account in de login-request hieronder.
 # Met een normale user-token zie je netjes de 403-reacties (zie laatste request).
-@baseUrl = http://localhost:3000
+# @baseUrl = http://localhost:3000
+
+@baseUrl = https://nodejs-ti-b-final-assignment-aidenstorme.onrender.com
 
 ### Register — verwacht 201 (eenmalig)
 # @name register

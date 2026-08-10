@@ -1,7 +1,9 @@
 # Incidents — http/incidents.http
 # Volledig dynamisch: service wordt eerst aangemaakt, incident linkt er via
 # de response-id aan. reportedBy = ingelogde user. DELETE vereist een admin.
-@baseUrl = http://localhost:3000
+# @baseUrl = http://localhost:3000
+
+@baseUrl = https://nodejs-ti-b-final-assignment-aidenstorme.onrender.com
 
 ### Register (indien nog geen account)
 POST {{baseUrl}}/api/auth/register

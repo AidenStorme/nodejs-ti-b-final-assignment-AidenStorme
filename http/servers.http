@@ -1,7 +1,9 @@
 # Servers — http/servers.http
 # Alles is dynamisch: owner komt uit de register/login-response.
 # DELETE vereist een admin-account (verwacht 403 met normale user).
-@baseUrl = http://localhost:3000
+# @baseUrl = http://localhost:3000
+
+@baseUrl = https://nodejs-ti-b-final-assignment-aidenstorme.onrender.com
 
 ### Register (indien nog geen account) — verwacht 201
 POST {{baseUrl}}/api/auth/register

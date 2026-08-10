@@ -17,9 +17,11 @@ Zie het [ER-diagram en de embed/reference-motivatie](docs/datamodel.md) voor de 
 
 ## Live URL
 
-`[LIVE URL HIER — wordt ingevuld na deployment, zie taak 46]`
+De API draait live op <https://nodejs-ti-b-final-assignment-aidenstorme.onrender.com>.
 
 Op dit moment draai je de API lokaal: `http://localhost:3000` (`GET /api/health` als rooktest).
+
+**Let op (gratis Render-tier):** de gratis tier van Render gaat na ~15 minuten inactiviteit "in slaap" (spins down). De eerste request na zo'n pauze kan daardoor 30–50 seconden duren (cold start); daarna reageert de API weer normaal.
 
 ## API-documentatie
 

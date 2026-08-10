@@ -1,6 +1,8 @@
 # Authenticatie — http/auth.http
 # Plaatshouders: test@example.com / test123. Geen echte tokens of wachtwoorden.
-@baseUrl = http://localhost:3000
+# @baseUrl = http://localhost:3000
+
+@baseUrl = https://nodejs-ti-b-final-assignment-aidenstorme.onrender.com
 
 ### Register — verwacht 201 (fout op "already exists" is ok, dan eerst deleten of andere email gebruiken)
 POST {{baseUrl}}/api/auth/register
