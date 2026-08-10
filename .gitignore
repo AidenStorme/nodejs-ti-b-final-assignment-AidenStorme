@@ -1,2 +1,19 @@
+node_modules/
+.env
+.env.*
+
+# AI-tooling
+.claude/
+.cursor/
+.opencode/
+CLAUDE.md
+AGENTS.md
+.windsurfrules
+
+# logs & coverage
+*.log
+coverage/
+.DS_Store
 docs/claude-project-instructies.md
+.gitignore
 docs/node-eindwerk-cursusgids.md
