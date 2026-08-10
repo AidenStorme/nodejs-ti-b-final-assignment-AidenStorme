@@ -76,7 +76,16 @@ router.put(
     ) {
       return res.status(403).json({ error: "Geen toegang" });
     }
-    const updated = await Incident.findByIdAndUpdate(req.params.id, req.body, {
+    const { reportedBy, affectedService, ...updateData } = req.body;
+    if (req.user.role === "admin") {
+      // Admin mag de melder en de getroffen service (her)toewijzen.
+      Object.assign(incident, req.body);
+      await incident.save();
+      return res.json(incident);
+    }
+    // Niet-admin: reportedBy (identiteit) en affectedService (admin-beslissing)
+    // worden stil genegeerd.
+    const updated = await Incident.findByIdAndUpdate(req.params.id, updateData, {
       returnDocument: "after",
       runValidators: true,
     });

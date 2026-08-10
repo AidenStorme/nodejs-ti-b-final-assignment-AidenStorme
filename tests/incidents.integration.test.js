@@ -122,3 +122,45 @@ test("POST /api/incidents met vervalste reportedBy in body krijgt eigen user als
   const incident = await Incident.findById(postRes.body._id);
   assert.strictEqual(incident.reportedBy.toString(), user._id);
 });
+
+test("PUT /api/incidents/:id met vervalste reportedBy/affectedService blijft behouden", async () => {
+  const { token, user } = await registerAndLogin("incidentPut@test.be");
+  const otherUser = await User.create({
+    name: "Andere",
+    email: "incidentPutForeign@test.be",
+    passwordHash: "geheim123",
+    role: "user",
+  });
+  const service = await Service.create({ name: "srv", image: "img:latest" });
+  const foreignService = await Service.create({
+    name: "vreemd",
+    image: "img:other",
+  });
+
+  const postRes = await request(app)
+    .post("/api/incidents")
+    .set("Authorization", `Bearer ${token}`)
+    .send({
+      title: "Eigen incident",
+      description: "Wordt aangepast door de melder",
+      severity: "low",
+      affectedService: service._id,
+      reportedBy: user._id,
+    });
+  assert.strictEqual(postRes.status, 201);
+
+  const putRes = await request(app)
+    .put(`/api/incidents/${postRes.body._id}`)
+    .set("Authorization", `Bearer ${token}`)
+    .send({
+      description: "Aangepaste beschrijving",
+      reportedBy: otherUser._id,
+      affectedService: foreignService._id,
+    });
+  assert.strictEqual(putRes.status, 200);
+
+  const incident = await Incident.findById(postRes.body._id);
+  assert.strictEqual(incident.description, "Aangepaste beschrijving");
+  assert.strictEqual(incident.reportedBy.toString(), user._id);
+  assert.strictEqual(incident.affectedService.toString(), service._id.toString());
+});

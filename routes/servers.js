@@ -70,7 +70,15 @@ router.put(
     if (server.owner.toString() !== req.user.id && req.user.role !== "admin") {
       return res.status(403).json({ error: "Geen toegang" });
     }
-    const updated = await Server.findByIdAndUpdate(req.params.id, req.body, {
+    const { owner, ...updateData } = req.body;
+    if (req.user.role === "admin") {
+      // Admin mag de eigenaar (her)toewijzen, net als bij users.js.
+      Object.assign(server, req.body);
+      await server.save();
+      return res.json(server);
+    }
+    // Niet-admin: owner uit de body wordt stil genegeerd (geen escalatie/eigendomsoverdracht).
+    const updated = await Server.findByIdAndUpdate(req.params.id, updateData, {
       returnDocument: "after",
       runValidators: true,
     });

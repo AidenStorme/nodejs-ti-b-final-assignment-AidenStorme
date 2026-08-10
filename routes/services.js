@@ -72,7 +72,16 @@ router.put(
         return res.status(403).json({ error: "Geen toegang" });
       }
     }
-    const updated = await Service.findByIdAndUpdate(req.params.id, req.body, {
+    const { servers, ...updateData } = req.body;
+    if (req.user.role === "admin") {
+      // Admin mag servers (her)toewijzen, net als bij users.js.
+      Object.assign(service, req.body);
+      await service.save();
+      return res.json(service);
+    }
+    // Niet-admin: het servers-veld wordt stil genegeerd — servertoewijzing
+    // blijft een admin-beslissing (minimale veilige fix, geen escalatie).
+    const updated = await Service.findByIdAndUpdate(req.params.id, updateData, {
       returnDocument: "after",
       runValidators: true,
     });

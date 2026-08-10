@@ -98,3 +98,59 @@ test("PUT /api/services/:id door niet-owner geeft 403", async () => {
   assert.strictEqual(putRes.status, 403);
   assert.deepStrictEqual(putRes.body, { error: "Geen toegang" });
 });
+
+test("PUT /api/services/:id met vervalst servers-veld laadt niet toe voor niet-admin", async () => {
+  const { token: ownerToken, user } = await registerAndLogin("serviceOwner@test.be");
+  const otherUser = await User.create({
+    name: "Andere",
+    email: "serviceForeign@test.be",
+    passwordHash: "geheim123",
+    role: "user",
+  });
+  const foreignServer = await Server.create({
+    hostname: "px-foreign",
+    ip: "10.0.0.77",
+    os: "Ubuntu 24.04",
+    cpuCores: 2,
+    ramGB: 4,
+    storageGB: 100,
+    owner: otherUser._id,
+  });
+
+  const ownServerRes = await request(app)
+    .post("/api/servers")
+    .set("Authorization", `Bearer ${ownerToken}`)
+    .send({
+      hostname: "px-eigen",
+      ip: "10.0.0.10",
+      os: "Ubuntu 24.04",
+      cpuCores: 2,
+      ramGB: 8,
+      storageGB: 100,
+      owner: user._id,
+    });
+  assert.strictEqual(ownServerRes.status, 201);
+
+  const serviceRes = await request(app)
+    .post("/api/services")
+    .set("Authorization", `Bearer ${ownerToken}`)
+    .send({
+      name: "web",
+      image: "web:latest",
+      servers: [ownServerRes.body._id],
+    });
+  assert.strictEqual(serviceRes.status, 201);
+
+  const putRes = await request(app)
+    .put(`/api/services/${serviceRes.body._id}`)
+    .set("Authorization", `Bearer ${ownerToken}`)
+    .send({ replicas: 3, servers: [foreignServer._id] });
+  assert.strictEqual(putRes.status, 200);
+
+  const service = await Service.findById(serviceRes.body._id);
+  assert.strictEqual(service.replicas, 3);
+  assert.deepStrictEqual(
+    service.servers.map((s) => s.toString()),
+    [ownServerRes.body._id],
+  );
+});
