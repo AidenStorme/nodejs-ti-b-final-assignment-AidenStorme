@@ -1,6 +1,7 @@
 node_modules/
 .env
 .env.*
+!.env.example
 
 # AI-tooling
 .claude/
@@ -17,3 +18,6 @@ coverage/
 docs/claude-project-instructies.md
 .gitignore
 docs/node-eindwerk-cursusgids.md
+atlas-credentials.env
+.gitignore
+.env.example
