@@ -1,3 +1,41 @@
+@baseUrl = http://localhost:3000
+
+### 1. Register (mag mislukken met "already exists" als je dit al eens draaide — dat is prima)
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Test User",
+  "email": "testuser@example.com",
+  "password": "test123",
+  "role": "admin"
+}
+
+### 2. Login — verwacht 200 + token (role hierboven moet genegeerd zijn, dus role: "user")
+# @name login
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "testuser@example.com",
+  "password": "test123"
+}
+
+### 3. GET /api/auth/me ZONDER token — verwacht 401
+GET {{baseUrl}}/api/auth/me
+
+### 4. GET /api/auth/me MET geldig token — verwacht 200 met je id/role
+GET {{baseUrl}}/api/auth/me
+Authorization: Bearer {{login.response.body.token}}
+
+### 5. GET /api/auth/me met KAPOT token — verwacht 400
+GET {{baseUrl}}/api/auth/me
+Authorization: Bearer ditisgeengeldigtoken
+
+### 5. GET /api/auth/me met juiste token — verwacht 200
+GET {{baseUrl}}/api/auth/me
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhN2ExMmIzZjQ5NzI4NjE0M2UxMWM4YSIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzg2Mzg1MDk2LCJleHAiOjE3ODYzODg2OTZ9.svHyKOGKOnj2J_CgzxT59l4Fyg8g1kvSeD3VYqNuu8o
+
 ### Ongeldig e-mailadres — verwacht 400
 POST http://localhost:3000/api/users
 Content-Type: application/json
@@ -13,7 +51,7 @@ POST http://localhost:3000/api/users
 Content-Type: application/json
 
 {
-  "name": "Aiden",
-  "email": "aiden@example.com",
+  "name": "Test User",
+  "email": "testuser@example.com",
   "passwordHash": "test123"
 }
