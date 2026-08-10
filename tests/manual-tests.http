@@ -1,0 +1,19 @@
+### Ongeldig e-mailadres — verwacht 400
+POST http://localhost:3000/api/users
+Content-Type: application/json
+
+{
+  "name": "Aiden",
+  "email": "geen-email",
+  "passwordHash": "test123"
+}
+
+### Geldige user — verwacht 201
+POST http://localhost:3000/api/users
+Content-Type: application/json
+
+{
+  "name": "Aiden",
+  "email": "aiden@example.com",
+  "passwordHash": "test123"
+}

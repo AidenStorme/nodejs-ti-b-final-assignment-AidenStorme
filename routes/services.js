@@ -1,5 +1,6 @@
 const express = require('express');
 const Service = require('../models/Service');
+const validateObjectId = require('../middleware/validateObjectId');
 
 const router = express.Router();
 
@@ -8,11 +9,14 @@ router.get('/', async (req, res) => {
     const services = await Service.find().populate('servers', 'hostname ip');
     res.json(services);
   } catch (err) {
+    if (err.name === 'ValidationError') {
+      return res.status(400).json({ error: err.message });
+    }
     res.status(500).json({ error: err.message });
   }
 });
 
-router.get('/:id', async (req, res) => {
+router.get('/:id', validateObjectId, async (req, res) => {
   try {
     const service = await Service.findById(req.params.id).populate('servers', 'hostname ip');
     if (!service) {
@@ -20,6 +24,9 @@ router.get('/:id', async (req, res) => {
     }
     res.json(service);
   } catch (err) {
+    if (err.name === 'ValidationError') {
+      return res.status(400).json({ error: err.message });
+    }
     res.status(500).json({ error: err.message });
   }
 });
@@ -29,11 +36,14 @@ router.post('/', async (req, res) => {
     const service = await Service.create(req.body);
     res.status(201).json(service);
   } catch (err) {
+    if (err.name === 'ValidationError') {
+      return res.status(400).json({ error: err.message });
+    }
     res.status(500).json({ error: err.message });
   }
 });
 
-router.put('/:id', async (req, res) => {
+router.put('/:id', validateObjectId, async (req, res) => {
   try {
     const service = await Service.findByIdAndUpdate(req.params.id, req.body, {
       returnDocument: 'after',
@@ -44,11 +54,14 @@ router.put('/:id', async (req, res) => {
     }
     res.json(service);
   } catch (err) {
+    if (err.name === 'ValidationError') {
+      return res.status(400).json({ error: err.message });
+    }
     res.status(500).json({ error: err.message });
   }
 });
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', validateObjectId, async (req, res) => {
   try {
     const service = await Service.findByIdAndDelete(req.params.id);
     if (!service) {
@@ -56,6 +69,9 @@ router.delete('/:id', async (req, res) => {
     }
     res.json({ message: 'Service verwijderd' });
   } catch (err) {
+    if (err.name === 'ValidationError') {
+      return res.status(400).json({ error: err.message });
+    }
     res.status(500).json({ error: err.message });
   }
 });

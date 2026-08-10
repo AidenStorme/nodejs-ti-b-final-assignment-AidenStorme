@@ -9,6 +9,7 @@ const usersRouter = require('./routes/users');
 const serversRouter = require('./routes/servers');
 const servicesRouter = require('./routes/services');
 const incidentsRouter = require('./routes/incidents');
+const authRouter = require('./routes/auth');
 
 dotenv.config();
 
@@ -27,6 +28,7 @@ app.use('/api/users', usersRouter);
 app.use('/api/servers', serversRouter);
 app.use('/api/services', servicesRouter);
 app.use('/api/incidents', incidentsRouter);
+app.use('/api/auth', authRouter);
 
 const PORT = process.env.PORT || 3000;
 const MONGO_URI = process.env.MONGO_URI;

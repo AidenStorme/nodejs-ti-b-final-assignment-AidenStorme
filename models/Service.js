@@ -11,9 +11,9 @@ const healthCheckSchema = new mongoose.Schema(
 const serviceSchema = new mongoose.Schema({
   name: { type: String, required: true },
   image: { type: String, required: true },
-  internalPort: { type: Number },
+  internalPort: { type: Number, min: 1, max: 65535 },
   publicUrl: { type: String },
-  replicas: { type: Number, default: 1 },
+  replicas: { type: Number, default: 1, min: 1 },
   envVars: {
     type: Map,
     of: String,

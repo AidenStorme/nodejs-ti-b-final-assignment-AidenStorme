@@ -9,7 +9,7 @@ const timelineEntrySchema = new mongoose.Schema(
 );
 
 const incidentSchema = new mongoose.Schema({
-  title: { type: String, required: true },
+  title: { type: String, required: true, minlength: 5 },
   description: { type: String, required: true },
   severity: { type: String, enum: ['low', 'medium', 'high', 'critical'], required: true },
   status: { type: String, enum: ['open', 'acknowledged', 'resolved'], default: 'open' },
