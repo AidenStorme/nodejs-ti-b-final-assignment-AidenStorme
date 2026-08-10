@@ -63,3 +63,12 @@ async function startServer() {
 }
 
 startServer();
+
+process.on('unhandledRejection', (err) => {
+  console.error('Onverwerkte promise-rejection:', err);
+});
+
+process.on('uncaughtException', (err) => {
+  console.error('Ongevangen exception, server wordt netjes afgesloten:', err);
+  process.exit(1);
+});
