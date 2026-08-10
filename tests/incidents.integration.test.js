@@ -94,3 +94,31 @@ test("DELETE /api/incidents/:id als gewone user geeft 403", async () => {
   assert.strictEqual(delRes.status, 403);
   assert.deepStrictEqual(delRes.body, { error: "Geen toegang" });
 });
+
+test("POST /api/incidents met vervalste reportedBy in body krijgt eigen user als melder", async () => {
+  const { token, user } = await registerAndLogin("incidentOwnerA@test.be");
+  const otherUser = await User.create({
+    name: "Andere",
+    email: "incidentOwnerB@test.be",
+    passwordHash: "geheim123",
+    role: "user",
+  });
+  const service = await Service.create({ name: "srv", image: "img:latest" });
+
+  const postRes = await request(app)
+    .post("/api/incidents")
+    .set("Authorization", `Bearer ${token}`)
+    .send({
+      title: "Vervalste melder",
+      description: "De melder mag niet vervalst worden",
+      severity: "medium",
+      affectedService: service._id,
+      reportedBy: otherUser._id,
+    });
+
+  assert.strictEqual(postRes.status, 201);
+  assert.strictEqual(postRes.body.reportedBy, user._id);
+
+  const incident = await Incident.findById(postRes.body._id);
+  assert.strictEqual(incident.reportedBy.toString(), user._id);
+});

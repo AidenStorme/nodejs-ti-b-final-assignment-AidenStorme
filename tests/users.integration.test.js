@@ -76,3 +76,20 @@ test("GET /api/users zonder token geeft 401", async () => {
   assert.strictEqual(res.status, 401);
   assert.deepStrictEqual(res.body, { error: "Geen token, toegang geweigerd" });
 });
+
+test("eigen profiel updaten met role:'admin' blijft role:'user' (geen escalatie)", async () => {
+  const email = "escalatie@test.be";
+  const token = await registerAndLogin(email);
+
+  const user = await User.findOne({ email });
+  const meRes = await request(app)
+    .put(`/api/users/${user._id}`)
+    .set("Authorization", `Bearer ${token}`)
+    .send({ name: "Xx", role: "admin" });
+
+  assert.strictEqual(meRes.status, 200);
+
+  const freshUser = await User.findById(user._id);
+  assert.strictEqual(freshUser.role, "user");
+  assert.strictEqual(freshUser.name, "Xx");
+});

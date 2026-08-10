@@ -72,3 +72,32 @@ test("GET /api/servers/:id met ongeldig ID-formaat geeft 400", async () => {
   assert.strictEqual(res.status, 400);
   assert.deepStrictEqual(res.body, { error: "Ongeldig ID formaat" });
 });
+
+test("POST /api/servers met vervalste owner in body krijgt eigen user als owner", async () => {
+  const { token, user } = await registerAndLogin("serverOwnerA@test.be");
+  const otherUser = await User.create({
+    name: "Andere",
+    email: "serverOwnerB@test.be",
+    passwordHash: "geheim123",
+    role: "user",
+  });
+
+  const postRes = await request(app)
+    .post("/api/servers")
+    .set("Authorization", `Bearer ${token}`)
+    .send({
+      hostname: "fakeserver",
+      ip: "10.0.0.9",
+      os: "Debian 12",
+      cpuCores: 2,
+      ramGB: 8,
+      storageGB: 250,
+      owner: otherUser._id,
+    });
+
+  assert.strictEqual(postRes.status, 201);
+  assert.strictEqual(postRes.body.owner, user._id);
+
+  const server = await Server.findById(postRes.body._id);
+  assert.strictEqual(server.owner.toString(), user._id);
+});

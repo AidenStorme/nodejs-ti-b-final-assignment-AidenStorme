@@ -50,7 +50,10 @@ router.post(
   "/",
   auth,
   asyncHandler(async (req, res) => {
-    const server = await Server.create(req.body);
+    const server = await Server.create({
+      ...req.body,
+      owner: req.user.id,
+    });
     res.status(201).json(server);
   }),
 );

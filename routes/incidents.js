@@ -53,7 +53,10 @@ router.post(
   "/",
   auth,
   asyncHandler(async (req, res) => {
-    const incident = await Incident.create(req.body);
+    const incident = await Incident.create({
+      ...req.body,
+      reportedBy: req.user.id,
+    });
     res.status(201).json(incident);
   }),
 );
