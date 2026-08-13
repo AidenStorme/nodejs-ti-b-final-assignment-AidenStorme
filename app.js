@@ -23,6 +23,14 @@ app.get("/api/health", (req, res) => {
   res.json({ status: "ok" });
 });
 
+app.get("/", (req, res) => {
+  res.json({
+    status: "ok",
+    message:
+      "Node.js Eindwerk API - zie /api/health of README voor documentatie",
+  });
+});
+
 app.use("/api/users", usersRouter);
 app.use("/api/servers", serversRouter);
 app.use("/api/services", servicesRouter);
